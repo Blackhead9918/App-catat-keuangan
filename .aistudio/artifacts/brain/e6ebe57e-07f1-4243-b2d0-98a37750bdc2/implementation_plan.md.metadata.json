@@ -1,0 +1,6 @@
+{
+  "summary":  "Rencana implementasi aplikasi Pencatat Keuangan dengan fitur sinkronisasi kalender real-time, jadwal rutin gajian (tiap 2 minggu / custom) dengan dialog konfirmasi, checklist pengeluaran otomatis potong saldo, penyesuaian saldo manual dengan catatan/alasan wajib, serta pelacakan aset piutang & hutang dengan sistem cicilan/pelunasan bertahap berbasis Room Database offline dan tema Modern Finansial Hijau Emerald.",
+  "updatedAt":  "2026-10-11T05:31:47.568808244Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

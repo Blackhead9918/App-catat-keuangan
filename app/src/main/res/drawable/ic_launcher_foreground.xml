@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:translateX="0"
+        android:translateY="0">
+        <!-- Coin behind wallet -->
+        <path
+            android:fillColor="#FFD54F"
+            android:pathData="M44,38m-11,0a11,11 0,1,0 22,0a11,11 0,1,0 -22,0" />
+        <path
+            android:fillColor="#FFA000"
+            android:pathData="M44,38m-8,0a8,8 0,1,0 16,0a8,8 0,1,0 -16,0" />
+        <path
+            android:fillColor="#FFE082"
+            android:pathData="M44,33L45.5,36.5L49,37L46.2,39.5L47,43L44,41L41,43L41.8,39.5L39,37L42.5,36.5Z" />
+
+        <!-- Wallet main body (Crisp White) -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M30,42 h48 c3.3,0 6,2.7 6,6 v22 c0,3.3 -2.7,6 -6,6 h-48 c-3.3,0 -6,-2.7 -6,-6 v-22 c0,-3.3 2.7,-6 6,-6 z" />
+
+        <!-- Inner fold shadow / accent -->
+        <path
+            android:fillColor="#E2E8F0"
+            android:pathData="M24,48 h60 v4 h-60 z" />
+
+        <!-- Wallet clasp/flap in Banking Blue -->
+        <path
+            android:fillColor="#0056D2"
+            android:pathData="M56,52 h24 c2.2,0 4,1.8 4,4 v8 c0,2.2 -1.8,4 -4,4 h-24 c-1.1,0 -2,-0.9 -2,-2 v-12 c0,-1.1 0.9,-2 2,-2 z" />
+
+        <!-- Clasp golden button -->
+        <path
+            android:fillColor="#FFD54F"
+            android:pathData="M74,60m-3,0a3,3 0,1,0 6,0a3,3 0,1,0 -6,0" />
+
+        <!-- Plus / Growth symbol on wallet -->
+        <path
+            android:fillColor="#0056D2"
+            android:pathData="M37,56 h4 v10 h-4 z" />
+        <path
+            android:fillColor="#0056D2"
+            android:pathData="M34,59 h10 v4 h-10 z" />
+    </group>
+</vector>
