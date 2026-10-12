@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 780" width="360" height="780"
+     font-family="Inter, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <title>Arah C — Playful Ledger — Beranda</title>
+  <defs>
+    <clipPath id="c1-clip1"><rect x="20" y="336" width="312" height="76" rx="14"/></clipPath>
+    <clipPath id="c1-clip2"><rect x="20" y="424" width="312" height="76" rx="14"/></clipPath>
+    <clipPath id="c1-clip3"><rect x="20" y="550" width="312" height="76" rx="14"/></clipPath>
+  </defs>
+
+  <rect x="0" y="0" width="360" height="780" fill="#FDF9F0"/>
+
+  <!-- status bar -->
+  <text x="20" y="20" font-size="12" font-weight="700" fill="#111827">9:41</text>
+  <g fill="#111827">
+    <rect x="300" y="14" width="2.5" height="5" rx="1"/>
+    <rect x="304.5" y="12" width="2.5" height="7" rx="1"/>
+    <rect x="309" y="10" width="2.5" height="9" rx="1"/>
+  </g>
+  <path d="M316 15.5a7 7 0 0 1 8 0" stroke="#111827" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M318 18a4 4 0 0 1 4 0" stroke="#111827" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <rect x="330" y="11" width="20" height="10" rx="3" fill="none" stroke="#111827" stroke-width="1.6"/>
+  <rect x="332.5" y="13.5" width="12" height="5" rx="1.5" fill="#111827"/>
+
+  <!-- AppHeader -->
+  <rect x="16" y="44" width="142" height="25" rx="3" fill="#FDE047"/>
+  <text x="20" y="64" font-size="26" font-weight="800" letter-spacing="-0.8" fill="#111827">Buku Kas</text>
+  <text x="20" y="86" font-size="12" font-weight="600" fill="#6B7280">Oktober 2026 &#183; 4 tagihan aktif</text>
+
+  <rect x="324" y="44" width="40" height="40" rx="12" fill="#111827"/>
+  <rect x="320" y="40" width="40" height="40" rx="12" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+  <g stroke="#111827" stroke-width="1.8" fill="none" stroke-linecap="round">
+    <rect x="331" y="48" width="18" height="16" rx="4"/>
+    <line x1="331" y1="53" x2="349" y2="53"/>
+    <line x1="335" y1="45" x2="335" y2="50"/>
+    <line x1="345" y1="45" x2="345" y2="50"/>
+  </g>
+
+  <!-- BalanceSheetBlock -->
+  <rect x="24" y="104" width="312" height="184" rx="18" fill="#111827"/>
+  <rect x="20" y="100" width="312" height="184" rx="18" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+  <text x="38" y="132" font-size="12" font-weight="600" letter-spacing="1" fill="#6B7280">KEKAYAAN BERSIH</text>
+  <text x="314" y="132" font-size="13" font-weight="700" fill="#2563EB" text-anchor="end">Atur Saldo</text>
+  <text x="38" y="174" font-size="34" font-weight="800" letter-spacing="-0.8" fill="#111827">Rp 12.480.000</text>
+  <line x1="38" y1="192" x2="314" y2="192" stroke="#111827" stroke-width="1.5"/>
+
+  <text x="38" y="216" font-size="13" font-weight="500" fill="#4B5563">Kas</text>
+  <text x="314" y="216" font-size="18" font-weight="700" fill="#111827" text-anchor="end">Rp 3.250.000</text>
+
+  <text x="38" y="242" font-size="13" font-weight="500" fill="#4B5563">Piutang di orang</text>
+  <text x="314" y="242" font-size="18" font-weight="700" fill="#111827" text-anchor="end">Rp 10.500.000</text>
+
+  <text x="38" y="268" font-size="13" font-weight="500" fill="#4B5563">Hutang kita</text>
+  <text x="314" y="268" font-size="18" font-weight="700" fill="#B42318" text-anchor="end">&#8722;Rp 1.270.000</text>
+
+  <!-- Section 1 -->
+  <text x="20" y="320" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6B7280">PERLU TINDAKAN</text>
+  <text x="340" y="320" font-size="12" font-weight="600" fill="#6B7280" text-anchor="end">2 item</text>
+
+  <!-- ObligationCard 1 — Overdue -->
+  <rect x="24" y="340" width="312" height="76" rx="14" fill="#111827"/>
+  <rect x="20" y="336" width="312" height="76" rx="14" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+  <g clip-path="url(#c1-clip1)"><rect x="20" y="336" width="5" height="76" fill="#B42318"/></g>
+  <rect x="36" y="356" width="36" height="36" rx="10" fill="#FEE2E2" stroke="#111827" stroke-width="1.5"/>
+  <rect x="52.5" y="364" width="3" height="11" rx="1.5" fill="#B42318"/>
+  <circle cx="54" cy="381" r="1.9" fill="#B42318"/>
+  <text x="84" y="366" font-size="15" font-weight="700" fill="#111827">Tagihan Internet</text>
+  <text x="84" y="386" font-size="12" font-weight="700" fill="#B42318">Terlambat 3 hari</text>
+  <text x="316" y="366" font-size="16" font-weight="700" fill="#111827" text-anchor="end">Rp 350.000</text>
+  <rect x="270" y="374" width="46" height="24" rx="12" fill="#B42318"/>
+  <text x="293" y="390" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">Bayar</text>
+
+  <!-- ObligationCard 2 — DueToday -->
+  <rect x="24" y="428" width="312" height="76" rx="14" fill="#111827"/>
+  <rect x="20" y="424" width="312" height="76" rx="14" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+  <g clip-path="url(#c1-clip2)"><rect x="20" y="424" width="5" height="76" fill="#92400E"/></g>
+  <rect x="36" y="444" width="36" height="36" rx="10" fill="#FEF08A" stroke="#111827" stroke-width="1.5"/>
+  <circle cx="54" cy="462" r="7.5" stroke="#92400E" stroke-width="1.8" fill="none"/>
+  <path d="M54 457.5V462h3.5" stroke="#92400E" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <text x="84" y="454" font-size="15" font-weight="700" fill="#111827">Langganan Wifi</text>
+  <text x="84" y="474" font-size="12" font-weight="700" fill="#92400E">Jatuh tempo hari ini</text>
+  <text x="316" y="454" font-size="16" font-weight="700" fill="#111827" text-anchor="end">Rp 150.000</text>
+  <rect x="270" y="462" width="46" height="24" rx="12" fill="#92400E"/>
+  <text x="293" y="478" font-size="12" font-weight="700" fill="#FFFFFF" text-anchor="middle">Bayar</text>
+
+  <!-- Section 2 -->
+  <text x="20" y="534" font-size="12" font-weight="600" letter-spacing="1.2" fill="#6B7280">AKAN DATANG</text>
+  <text x="340" y="534" font-size="12" font-weight="600" fill="#6B7280" text-anchor="end">2 item</text>
+
+  <!-- ObligationCard 3 — Scheduled -->
+  <rect x="24" y="554" width="312" height="76" rx="14" fill="#111827"/>
+  <rect x="20" y="550" width="312" height="76" rx="14" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+  <g clip-path="url(#c1-clip3)"><rect x="20" y="550" width="5" height="76" fill="#DCFCE7"/></g>
+  <rect x="36" y="570" width="36" height="36" rx="10" fill="#DCFCE7" stroke="#111827" stroke-width="1.5"/>
+  <g stroke="#15803D" stroke-width="1.8" fill="none" stroke-linecap="round">
+    <rect x="47" y="579" width="14" height="13" rx="3"/>
+    <line x1="47" y1="584" x2="61" y2="584"/>
+    <line x1="50.5" y1="576" x2="50.5" y2="580"/>
+    <line x1="57.5" y1="576" x2="57.5" y2="580"/>
+  </g>
+  <text x="84" y="580" font-size="15" font-weight="700" fill="#111827">Gaji Bulanan</text>
+  <text x="84" y="600" font-size="12" font-weight="600" fill="#6B7280">12 Nov 2026 &#183; Bulanan</text>
+  <text x="316" y="580" font-size="16" font-weight="700" fill="#15803D" text-anchor="end">+Rp 8.500.000</text>
+  <rect x="270" y="588" width="46" height="24" rx="12" fill="#FFFFFF" stroke="#111827" stroke-width="2"/>
+  <text x="293" y="604" font-size="12" font-weight="700" fill="#111827" text-anchor="middle">Lihat</text>
+
+  <!-- CTA -->
+  <rect x="24" y="648" width="312" height="46" rx="23" fill="#111827"/>
+  <rect x="20" y="644" width="312" height="46" rx="23" fill="#2563EB" stroke="#111827" stroke-width="2"/>
+  <text x="176" y="673" font-size="15" font-weight="700" fill="#FFFFFF" text-anchor="middle">Catat tagihan baru</text>
+
+  <!-- bottom nav -->
+  <rect x="0" y="712" width="360" height="68" fill="#FFFFFF"/>
+  <line x1="0" y1="713" x2="360" y2="713" stroke="#111827" stroke-width="2"/>
+
+  <path d="M27 741 L36 732 L45 741 L45 750 L39.5 750 L39.5 744 L32.5 744 L32.5 750 L27 750 Z"
+        fill="#FDE047" stroke="#111827" stroke-width="1.8" stroke-linejoin="round"/>
+  <text x="36" y="766" font-size="12" font-weight="800" fill="#111827" text-anchor="middle">Beranda</text>
+
+  <g stroke="#6B7280" stroke-width="1.8" fill="none" stroke-linecap="round">
+    <rect x="99" y="730" width="18" height="16" rx="4"/>
+    <line x1="99" y1="735" x2="117" y2="735"/>
+    <line x1="103" y1="727" x2="103" y2="732"/>
+    <line x1="113" y1="727" x2="113" y2="732"/>
+  </g>
+  <text x="108" y="766" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">Kalender</text>
+
+  <g stroke="#6B7280" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="171" y="729" width="18" height="17" rx="4"/>
+    <path d="M175.5 738 L178.5 741 L184.5 734.5"/>
+  </g>
+  <text x="180" y="766" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">Ceklis</text>
+
+  <g stroke="#6B7280" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M243 733 h16 a2 2 0 0 1 2 2 v9 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-0 a2 2 0 0 1 -2 -2 v-9 a2 2 0 0 1 2 -2 z"/>
+  </g>
+  <text x="252" y="766" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">Aset</text>
+
+  <g stroke="#6B7280" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="315" y1="731" x2="333" y2="731"/>
+    <line x1="315" y1="737" x2="333" y2="737"/>
+    <line x1="315" y1="743" x2="327" y2="743"/>
+  </g>
+  <text x="324" y="766" font-size="12" font-weight="600" fill="#6B7280" text-anchor="middle">Riwayat</text>
+</svg>

@@ -1,0 +1,166 @@
+name: Android Unsigned Release APK
+
+# Menghasilkan APK release yang TEROPTIMASI (R8 minify + resource shrinking) dan UNSIGNED.
+#
+# Cara kerja bagian "unsigned": build type release di app/build.gradle.kts menugaskan
+# signingConfigs.getByName("release"), dan berkas keystore-nya tidak ada di repo. Env var
+# UNSIGNED_RELEASE_BUILD di bawah membuat penugasan itu menjadi null, sehingga AGP menghasilkan
+# app-release-unsigned.apk. Tidak ada flag CLI resmi di AGP 9 untuk mematikan signing, jadi
+# jalur env var inilah yang dipakai.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - '.github/workflows/android-release-apk.yml'
+
+# Hanya butuh membaca repo; tidak ada rahasia yang dipakai.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Dibaca oleh app/build.gradle.kts. Lihat komentar di sana.
+  UNSIGNED_RELEASE_BUILD: 'true'
+  # AGP 9.1.1 mensyaratkan JDK 17; Gradle 9.3.1 mendukung JDK 17-25.
+  JAVA_VERSION: '17'
+  # compileSdk memakai DSL "release(36) { minorApiLevel = 1 }" -> paket SDK android-36.1.
+  SDK_PLATFORM: 'platforms;android-36.1'
+  SDK_BUILD_TOOLS: 'build-tools;36.0.0'
+
+jobs:
+  build-unsigned-release-apk:
+    name: Build unsigned optimized release APK
+    # Di-pin ke 24.04: image ini sudah memuat android-36.1 dan build-tools 36.0.0.
+    # Label ubuntu-latest dijadwalkan berpindah ke 26.04 pada November 2026.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Ensure SDK platform, build-tools and platform-tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          echo "ANDROID_SDK_ROOT=$SDK"
+
+          install_if_missing() {
+            local pkg="$1"
+            local dir="$2"
+            if [ -d "$SDK/$dir" ]; then
+              echo "$pkg sudah tersedia di image runner"
+            else
+              echo "Memasang $pkg ..."
+              sdkmanager --install "$pkg"
+            fi
+          }
+
+          install_if_missing "$SDK_PLATFORM" "platforms/android-36.1"
+          install_if_missing "$SDK_BUILD_TOOLS" "build-tools/36.0.0"
+          install_if_missing "platform-tools" "platform-tools"
+          sdkmanager --list_installed || true
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build unsigned release APK
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          # Berkas gradlew tersimpan di git dengan mode 100644, jadi bit executable-nya
+          # hilang saat checkout. Tanpa baris ini "gradlew" tidak bisa dijalankan.
+          chmod +x gradlew
+
+          java -version
+          ./gradlew --version
+          ./gradlew :app:assembleRelease --no-daemon --stacktrace --warning-mode=summary
+
+      - name: Verify APK is unsigned, aligned, and report size
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          BUILD_TOOLS="$(find "$SDK/build-tools" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)"
+          echo "build-tools yang dipakai: $BUILD_TOOLS"
+
+          mapfile -t APKS < <(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' | sort)
+          if [ "${#APKS[@]}" -eq 0 ]; then
+            echo "::error::Tidak ada berkas .apk di app/build/outputs/apk/release/"
+            exit 1
+          fi
+          APK="${APKS[0]}"
+          echo "APK: $APK"
+
+          # 1. Integritas arsip: memastikan APK tidak rusak, sehingga kegagalan verifikasi
+          #    tanda tangan di langkah 3 benar-benar berarti "unsigned".
+          unzip -t "$APK" > /dev/null
+          echo "1/5 integritas ZIP: OK"
+
+          # 2. APK unsigned tidak boleh punya tanda tangan skema v1 (JAR signing).
+          if unzip -Z1 "$APK" | grep -Eiq '^META-INF/[^/]+\.(RSA|DSA|EC|SF)$'; then
+            echo "::error::$APK mengandung berkas tanda tangan JAR/v1"
+            exit 1
+          fi
+          echo "2/5 tidak ada META-INF/*.RSA|DSA|EC|SF: OK"
+
+          # 3. apksigner harus MENOLAK. Kode keluar bukan nol = tidak ada skema tanda tangan
+          #    v2/v3/v4. Kegagalan di sini berarti APK masih bertanda tangan.
+          APKSIGNER_LOG="$RUNNER_TEMP/apksigner-verify.log"
+          if "$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$APK" > "$APKSIGNER_LOG" 2>&1; then
+            echo "::error::$APK lolos verifikasi apksigner, seharusnya unsigned."
+            cat "$APKSIGNER_LOG"
+            exit 1
+          fi
+          echo "3/5 apksigner menolak APK ini (diharapkan untuk APK unsigned):"
+          cat "$APKSIGNER_LOG"
+
+          # 4. Selaras. -P 16 juga memeriksa alignment halaman untuk library native.
+          "$BUILD_TOOLS/zipalign" -c -P 16 -v 4 "$APK" > /dev/null
+          echo "4/5 zipalign: selaras"
+
+          # 5. Informasi paket (informatif) + ukuran + hash.
+          if [ -x "$BUILD_TOOLS/aapt2" ]; then
+            "$BUILD_TOOLS/aapt2" dump badging "$APK" | sed -n '1,3p' || true
+          fi
+          SIZE_BYTES="$(stat -c '%s' "$APK")"
+          echo "Ukuran APK: ${SIZE_BYTES} byte ($(awk "BEGIN{printf \"%.2f\", $SIZE_BYTES/1048576}") MiB)"
+          sha256sum "$APK" | tee apk-sha256.txt
+          echo "5/5 ringkasan: OK"
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: unsigned-release-apk
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/release/output-metadata.json
+            app/build/outputs/mapping/release/mapping.txt
+            apk-sha256.txt
+          if-no-files-found: error
+          retention-days: 30

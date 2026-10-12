@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pratinjau Desain — Pencatat Keuangan</title>
+<style>
+  :root {
+    --canvas: #F6F7F9;
+    --surface: #FFFFFF;
+    --line: #E6E9EF;
+    --line-strong: #D0D5DD;
+    --ink: #101828;
+    --ink2: #5B6472;
+    --ink3: #667085;
+    --brand: #0056D2;
+    --brand-soft: #EFF6FF;
+    --in: #047857;
+    --out: #B42318;
+    --due: #92400E;
+    --due-soft: #FEF0C7;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 48px 24px 96px; }
+
+  header.page { border-bottom: 1px solid var(--line-strong); padding-bottom: 28px; margin-bottom: 40px; }
+  .kicker {
+    font-size: 12px; font-weight: 600; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--ink3); margin: 0 0 10px;
+  }
+  h1 { font-size: 34px; line-height: 1.15; letter-spacing: -.02em; font-weight: 700; margin: 0 0 12px; }
+  .lede { font-size: 16px; color: var(--ink2); max-width: 68ch; margin: 0; }
+  .meta { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--line); color: var(--ink2);
+  }
+  .pill.locked { background: var(--brand-soft); border-color: #BFDBFE; color: var(--brand); }
+
+  h2 { font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink3); margin: 56px 0 16px; }
+  h2:first-of-type { margin-top: 0; }
+
+  /* ---------- perbandingan ---------- */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .option {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+    padding: 24px; display: flex; flex-direction: column; gap: 20px;
+  }
+  .option.a { box-shadow: 0 1px 0 #E6E9EF; }
+  .option.c { border: 2px solid #111827; box-shadow: 6px 6px 0 #111827; }
+
+  .opt-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .opt-name { font-size: 21px; font-weight: 700; letter-spacing: -.015em; margin: 0; }
+  .option.c .opt-name { font-weight: 800; letter-spacing: -.03em; }
+  .opt-tag {
+    font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 6px; background: var(--brand-soft); color: var(--brand);
+  }
+  .option.c .opt-tag { background: #FDE047; color: #111827; border: 1.5px solid #111827; }
+  .opt-desc { font-size: 14px; color: var(--ink2); margin: 0; }
+
+  .screens { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  figure img {
+    display: block; width: 100%; max-width: 250px; height: auto;
+    border-radius: 18px; border: 1px solid var(--line); background: var(--canvas);
+  }
+  .option.c figure img { border: 2px solid #111827; border-radius: 20px; }
+  figcaption { font-size: 12px; font-weight: 600; color: var(--ink3); }
+
+  .sheet { margin-top: 8px; }
+  .sheet img {
+    display: block; width: 100%; height: auto;
+    border: 1px solid var(--line); border-radius: 16px; background: var(--canvas);
+  }
+  .option.c .sheet img { border: 2px solid #111827; }
+
+  ul.claims { margin: 0; padding-left: 20px; font-size: 14px; color: var(--ink2); }
+  ul.claims li { margin-bottom: 7px; }
+  ul.claims strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- tabel ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 680px; font-size: 14px; }
+  th, td { text-align: left; padding: 14px 18px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--ink3); background: #FAFBFC; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.same { color: var(--ink2); }
+  .tag-same { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 5px; background: #ECFDF5; color: var(--in); }
+  .tag-diff { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 5px; background: var(--due-soft); color: var(--due); }
+
+  /* ---------- p0 ---------- */
+  .p0 { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 28px; }
+  .p0 h3 { font-size: 17px; font-weight: 700; margin: 0 0 6px; }
+  .p0 p.sub { font-size: 14px; color: var(--ink2); margin: 0 0 20px; }
+  ol.p0-list { margin: 0; padding: 0; list-style: none; counter-reset: p0; }
+  ol.p0-list li {
+    counter-increment: p0; position: relative; padding: 12px 0 12px 44px;
+    border-top: 1px solid var(--line); font-size: 14px; color: var(--ink2);
+  }
+  ol.p0-list li:first-child { border-top: 2px solid var(--ink); }
+  ol.p0-list li::before {
+    content: "P0-" counter(p0); position: absolute; left: 0; top: 12px;
+    font-size: 11px; font-weight: 700; letter-spacing: .04em;
+    color: var(--out); background: #FEE4E2; padding: 3px 7px; border-radius: 5px;
+  }
+  ol.p0-list li strong { color: var(--ink); font-weight: 600; }
+
+  .note {
+    margin-top: 40px; background: var(--brand-soft); border: 1px solid #BFDBFE;
+    border-radius: 16px; padding: 22px 24px;
+  }
+  .note h3 { font-size: 15px; font-weight: 700; margin: 0 0 8px; color: var(--brand); }
+  .note p { font-size: 14px; color: #334155; margin: 0 0 10px; }
+  .note p:last-child { margin-bottom: 0; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: .9em; background: #FFFFFF; border: 1px solid var(--line);
+    border-radius: 5px; padding: 1px 5px; color: var(--ink);
+  }
+
+  @media (max-width: 900px) {
+    .compare { grid-template-columns: 1fr; }
+    h1 { font-size: 27px; }
+    .wrap { padding: 32px 16px 72px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <p class="kicker">Pratinjau Desain &#183; belum dieksekusi</p>
+    <h1>Pencatat Keuangan &#8212; dua arah redesign untuk dibandingkan</h1>
+    <p class="lede">
+      Dua arah visual dengan <strong>struktur informasi yang identik</strong>. Yang berbeda hanya warna,
+      tipografi, bentuk, dan gerak. Memilih salah satu tidak mengubah arsitektur aplikasi, alur, atau logika
+      saldo &#8212; hanya tampilannya.
+    </p>
+    <div class="meta">
+      <span class="pill locked">Light-only &#183; font sistem</span>
+      <span class="pill">Belum ada source code yang diubah</span>
+      <span class="pill">Mockup = spesifikasi, bukan ilustrasi</span>
+    </div>
+  </header>
+
+  <h2>Bandingkan berdampingan</h2>
+  <div class="compare">
+
+    <!-- ============ ARAH A ============ -->
+    <section class="option a">
+      <div class="opt-head">
+        <h3 class="opt-name">Arah A &#8212; Buku Kas</h3>
+        <span class="opt-tag">Rekomendasi</span>
+      </div>
+      <p class="opt-desc">
+        Tenang, presisi, jujur. Kartu gradient bergaya kartu ATM dihapus, diganti <strong>Balance Sheet Block</strong>
+        berisi empat baris nilai yang memang isi sebenarnya dari kartu itu. Kartu didefinisikan oleh garis 1px,
+        bukan bayangan. Biru dipakai hemat, bukan sebagai header semua layar.
+      </p>
+
+      <div class="screens">
+        <figure>
+          <img src="buku-kas-beranda.svg" alt="Arah A Buku Kas — Beranda" width="360" height="780">
+          <figcaption>Beranda</figcaption>
+        </figure>
+        <figure>
+          <img src="buku-kas-riwayat.svg" alt="Arah A Buku Kas — Riwayat" width="360" height="780">
+          <figcaption>Riwayat</figcaption>
+        </figure>
+      </div>
+
+      <div class="sheet">
+        <img src="buku-kas-komponen.svg" alt="Arah A — lembar komponen, token, dan state" width="980" height="900">
+      </div>
+
+      <ul class="claims">
+        <li><strong>Kesan:</strong> buku besar digital yang rapi. Serius tanpa dingin.</li>
+        <li><strong>Kekuatan:</strong> angka paling cepat dipindai; keterbacaan tertinggi; paling sulit salah tafsir.</li>
+        <li><strong>Kontras:</strong> semua pasangan teks &#8805; 4.5:1 (ink 17.7:1, ink3 4.97:1, hijau 5.48:1, merah 6.57:1).</li>
+        <li><strong>Risiko:</strong> bisa terasa kurang berkarakter bila dibandingkan aplikasi sejenis.</li>
+      </ul>
+    </section>
+
+    <!-- ============ ARAH C ============ -->
+    <section class="option c">
+      <div class="opt-head">
+        <h3 class="opt-name">Arah C &#8212; Playful Ledger</h3>
+        <span class="opt-tag">Ekspresif</span>
+      </div>
+      <p class="opt-desc">
+        Bugna hangat, border hitam 2px, bayangan keras tanpa blur, warna blok solid. Karakter kuat membuat
+        aplikasi terasa seperti <strong>buku catatan fisik dengan stiker</strong> &#8212; sesuatu yang ingin dibuka,
+        bukan yang harus dibuka.
+      </p>
+
+      <div class="screens">
+        <figure>
+          <img src="playful-beranda.svg" alt="Arah C Playful Ledger — Beranda" width="360" height="780">
+          <figcaption>Beranda</figcaption>
+        </figure>
+        <figure>
+          <img src="playful-riwayat.svg" alt="Arah C Playful Ledger — Riwayat" width="360" height="780">
+          <figcaption>Riwayat</figcaption>
+        </figure>
+      </div>
+
+      <div class="sheet">
+        <img src="playful-komponen.svg" alt="Arah C — lembar komponen, token, dan state" width="980" height="900">
+      </div>
+
+      <ul class="claims">
+        <li><strong>Kesan:</strong> hangat, ekspresif, tidak menggurui.</li>
+        <li><strong>Kekuatan:</strong> paling mudah dikenali; sorotan kuning memberi penanda status yang kuat.</li>
+        <li><strong>Kontras:</strong> semua pasangan teks &#8805; 4.5:1; amber di atas kuning sorot (3.81:1) dibatasi untuk ikon saja.</li>
+        <li><strong>Risiko:</strong> untuk aplikasi keuangan, kesan &#8220;tidak serius&#8221; bisa mengurangi kepercayaan pada sebagian pengguna.</li>
+      </ul>
+    </section>
+  </div>
+
+  <h2>Apa yang berbeda &amp; apa yang tidak</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Aspek</th><th>Arah A &#8212; Buku Kas</th><th>Arah C &#8212; Playful Ledger</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Warna</td>
+          <td>Neutral sejuk, biru dipakai hemat</td>
+          <td>Kertas hangat, kuning sorot, border hitam</td>
+          <td><span class="tag-diff">Berbeda</span></td>
+        </tr>
+        <tr>
+          <td>Tipografi</td>
+          <td>32/24/17/15/13/12 &#183; weight 400&#8211;700</td>
+          <td>34/26/18/17/15/13/12 &#183; weight 400&#8211;800</td>
+          <td><span class="tag-diff">Berbeda</span></td>
+        </tr>
+        <tr>
+          <td>Bentuk</td>
+          <td>Radius 20/14/10, garis 1px, <strong>tanpa bayangan</strong></td>
+          <td>Radius 18/12/pill, border 2px, <strong>bayangan keras</strong></td>
+          <td><span class="tag-diff">Berbeda</span></td>
+        </tr>
+        <tr>
+          <td>Kartu hero</td>
+          <td>Balance Sheet Block (4 baris nilai)</td>
+          <td>Balance Sheet Block (4 baris nilai)</td>
+          <td><span class="tag-same">Sama</span></td>
+        </tr>
+        <tr>
+          <td>Struktur Beranda</td>
+          <td colspan="2" class="same">Header &#8594; Balance Sheet &#8594; Perlu Tindakan &#8594; Akan Datang &#8594; 1 CTA</td>
+          <td><span class="tag-same">Sama</span></td>
+        </tr>
+        <tr>
+          <td>Struktur Riwayat</td>
+          <td colspan="2" class="same">Saldo &#8594; filter &#8594; grup per tanggal &#8594; saldo berjalan per baris</td>
+          <td><span class="tag-same">Sama</span></td>
+        </tr>
+        <tr>
+          <td>Komponen</td>
+          <td colspan="2" class="same">ObligationCard (5 state), LedgerRow, MoneyText, AppHeader, EmptyState, ConfirmSheet, UndoSnackbar</td>
+          <td><span class="tag-same">Sama</span></td>
+        </tr>
+        <tr>
+          <td>State</td>
+          <td colspan="2" class="same">loading (skeleton, bukan &#8220;Rp 0&#8221;), empty selalu tampil, undo setelah hapus</td>
+          <td><span class="tag-same">Sama</span></td>
+        </tr>
+        <tr>
+          <td>Aksesibilitas</td>
+          <td colspan="2" class="same">Kontras &#8805; 4.5:1, lantai teks 12sp, target ketuk &#8805; 48dp, status selalu ada teks</td>
+          <td><span class="tag-same">Sama</span></td>
+        </tr>
+        <tr>
+          <td>Perbaikan P0</td>
+          <td colspan="2" class="same">Delapan perbaikan mendesak &#8212; dikerjakan tanpa menunggu pilihan arah</td>
+          <td><span class="tag-same">Sama</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Yang bisa dikerjakan sekarang, tanpa menunggu pilihan</h2>
+  <div class="p0">
+    <h3>P0 &#8212; perbaikan paling mendesak</h3>
+    <p class="sub">
+      Delapan perbaikan ini tidak mengandung keputusan estetika. Hasilnya tetap valid di Arah A maupun Arah C,
+      jadi bisa dikerjakan lebih dulu sementara kamu memutuskan arah visualnya.
+    </p>
+    <ol class="p0-list">
+      <li><strong>Jangan pernah tampilkan &#8220;Rp 0&#8221; sebelum data siap.</strong> <code>isInitialized</code> sudah ada di ViewModel tapi belum dipakai UI &#8212; render <code>&#8212;</code> + skeleton.</li>
+      <li><strong>Konfirmasi sebelum menghapus.</strong> Tiga callback di <code>MainActivity</code> memanggil <code>deleteSchedule</code>&#8202;/&#8202;<code>deleteDebt</code> langsung, dipicu dari 9 tombol.</li>
+      <li><strong>Bayar tagihan dari Kalender harus pakai dialog yang sama.</strong> Sekarang memotong saldo satu periode tanpa konfirmasi.</li>
+      <li><strong>Perbaiki kontras teks nominal.</strong> Hijau 2.6:1 dan merah 3.8:1 &#8212; keduanya gagal WCAG AA untuk teks normal.</li>
+      <li><strong>Pisahkan merah &#8220;pengeluaran&#8221; dari merah &#8220;bahaya&#8221;.</strong> Saat ini <code>error = ExpenseRed</code>, sehingga dua makna berbagi satu warna.</li>
+      <li><strong>Hapus <code>Checkbox</code> yang tidak pernah tercentang.</strong> Dua tempat mengunci <code>checked = false</code>; kontrol itu berbohong.</li>
+      <li><strong>Naikkan lantai ukuran teks ke 12sp.</strong> Ada 27 kemunculan 10&#8211;11sp di lima layar.</li>
+      <li><strong>Pindahkan &#8220;Kelola &amp; Bersihkan Data&#8221; dari header Beranda</strong> ke menu, karena area ketuknya kecil dan berdekatan dengan chip tanggal.</li>
+    </ol>
+  </div>
+
+  <div class="note">
+    <h3>Dokumen lengkapnya</h3>
+    <p>
+      Spesifikasi penuh ada di <code>DESIGN_SPEC_REDESIGN.md</code>: token warna lengkap dengan rasio kontras
+      terverifikasi, skala tipografi, spesifikasi tiap komponen, rancangan kelima layar, penanganan state,
+      aturan aksesibilitas, batasan implementasi, kriteria selesai per tahap, dan 8 pertanyaan yang perlu
+      dijawab sebelum eksekusi.
+    </p>
+    <p>
+      Analisis kondisi saat ini ada di <code>DESIGN_CONTEXT.md</code>. Mockup digambar pada lebar 360dp
+      (layar Android terkecil yang umum); angka, teks, dan warna di dalamnya adalah nilai persis dari spesifikasi.
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

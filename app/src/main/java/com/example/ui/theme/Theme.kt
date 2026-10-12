@@ -1,72 +1,103 @@
 package com.example.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.Typography
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 
-// Light Banking Color Scheme (Tema Putih Bersih & Biru Perbankan Modern)
-private val LightBankingColorScheme = lightColorScheme(
-    primary = BankingBluePrimary,            // Biru Perbankan #0056D2
-    onPrimary = Color.White,
-    primaryContainer = BankingBlueContainer, // Ice blue #EFF6FF
-    onPrimaryContainer = BankingBlueDark,    // Navy pekat #003E9A
-    secondary = BlueReceivable,              // Biru muda aset piutang
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFE0F2FE),
-    onSecondaryContainer = Color(0xFF0369A1),
-    tertiary = GoldAccent,
-    background = LightBackground,            // Slate-100 #F1F5F9 (memberikan kontras bersih terhadap kartu putih)
-    onBackground = LightOnBackground,        // Slate-900 #0F172A
-    surface = LightSurface,                  // Putih Murni #FFFFFF
-    onSurface = LightOnSurface,              // Slate-800 #1E293B
-    surfaceVariant = LightSurfaceVariant,    // Slate-200 #E2E8F0
-    onSurfaceVariant = LightOnSurfaceVariant,// Slate-600 #475569
-    outline = LightOutline,                  // Slate-300 #CBD5E1
-    error = ExpenseRed,
-    onError = Color.White
-)
-
-private val DarkBankingColorScheme = darkColorScheme(
-    primary = BankingBlueLight,
-    onPrimary = Color.White,
-    primaryContainer = BankingBlueDark,
-    onPrimaryContainer = Color(0xFFDBEAFE),
-    secondary = BlueReceivable,
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFF1E3A8A),
-    onSecondaryContainer = Color(0xFFBFDBFE),
-    tertiary = GoldAccent,
-    background = DarkBackground,
-    onBackground = DarkOnBackground,
-    surface = DarkSurface,
-    onSurface = DarkOnSurface,
-    surfaceVariant = DarkSurfaceVariant,
-    onSurfaceVariant = DarkOnSurfaceVariant,
-    outline = DarkOutline,
-    error = ExpenseRed,
-    onError = Color.White
-)
-
+/**
+ * Tema aplikasi.
+ *
+ * Aplikasi ini **light-only** dan memakai **font sistem** — tidak ada mode gelap dan tidak
+ * ada file font. `darkTheme` dan `dynamicColor` dipertahankan hanya supaya pemanggil lama
+ * tetap kompilasi; keduanya tidak berpengaruh.
+ *
+ * `direction` memilih *arah desain* (Buku Kas / Playful Ledger), bukan mode gelap.
+ */
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun PencatatKeuanganTheme(
-    darkTheme: Boolean = false, // Default: Putih Bersih & Biru Perbankan
+    direction: ThemeDirection = ThemeDirection.BUKU_KAS,
+    darkTheme: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkBankingColorScheme else LightBankingColorScheme
+    val tokens = tokensFor(direction)
+    val colorScheme = remember(tokens) { appColorScheme(tokens) }
+    val typography = remember(tokens) { appTypography(tokens) }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalAppTokens provides tokens) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = typography,
+            content = content
+        )
+    }
 }
 
+/** Alias lama. Dipertahankan agar pemanggil lama tidak perlu diubah serentak. */
 @Composable
 fun MyApplicationTheme(
     darkTheme: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
-) = PencatatKeuanganTheme(darkTheme, dynamicColor, content)
+) = PencatatKeuanganTheme(
+    direction = ThemeDirection.BUKU_KAS,
+    darkTheme = darkTheme,
+    dynamicColor = dynamicColor,
+    content = content
+)
+
+private fun appColorScheme(tokens: AppTokens) = lightColorScheme(
+    primary = tokens.brand,
+    onPrimary = tokens.onBrand,
+    primaryContainer = tokens.brandSoft,
+    onPrimaryContainer = tokens.ink,
+    inversePrimary = tokens.brand,
+    secondary = tokens.receivable,
+    onSecondary = tokens.onBrand,
+    secondaryContainer = tokens.brandSoft,
+    onSecondaryContainer = tokens.ink,
+    tertiary = tokens.dueText,
+    onTertiary = tokens.onBrand,
+    tertiaryContainer = tokens.dueBg,
+    onTertiaryContainer = tokens.ink,
+    background = tokens.canvas,
+    onBackground = tokens.ink,
+    surface = tokens.surface,
+    onSurface = tokens.ink,
+    surfaceVariant = tokens.surfaceSunken,
+    onSurfaceVariant = tokens.ink2,
+    surfaceTint = tokens.brand,
+    inverseSurface = tokens.ink,
+    inverseOnSurface = tokens.canvas,
+    error = tokens.danger,
+    onError = tokens.onDanger,
+    errorContainer = tokens.outBg,
+    onErrorContainer = tokens.outText,
+    outline = tokens.lineStrong,
+    outlineVariant = tokens.line,
+    scrim = Color(0xFF000000)
+)
+
+/**
+ * Peran Material 3 dipetakan dari token arah, supaya layar yang belum dimigrasikan penuh
+ * ikut berubah saat user berganti tema.
+ */
+private fun appTypography(tokens: AppTokens) = Typography(
+    headlineLarge = tokens.heroStyle,
+    headlineMedium = tokens.amountLStyle,
+    headlineSmall = tokens.amountLStyle,
+    titleLarge = tokens.amountLStyle,
+    titleMedium = tokens.titleStyle,
+    titleSmall = tokens.amountMStyle,
+    bodyLarge = tokens.bodyStyle,
+    bodyMedium = tokens.bodyStyle,
+    bodySmall = tokens.captionStyle,
+    labelLarge = tokens.labelStyle,
+    labelMedium = tokens.labelStyle,
+    labelSmall = tokens.captionStyle
+)

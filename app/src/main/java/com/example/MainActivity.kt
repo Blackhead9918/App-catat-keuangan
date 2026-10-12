@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -19,7 +21,6 @@ import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.Handshake
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -27,31 +28,35 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.data.model.Constants
+import com.example.data.model.DebtReceivableEntity
+import com.example.data.model.FinancialScheduleEntity
 import com.example.ui.FinancialViewModel
 import com.example.ui.components.AddDebtDialog
 import com.example.ui.components.AddScheduleDialog
+import com.example.ui.components.ConfirmSheet
 import com.example.ui.screens.CalendarScreen
 import com.example.ui.screens.ChecklistScreen
 import com.example.ui.screens.DebtAssetScreen
 import com.example.ui.screens.HistoryScreen
 import com.example.ui.screens.HomeScreen
-import androidx.compose.foundation.border
-import androidx.compose.ui.text.font.FontWeight
-import com.example.ui.theme.BankingBlueContainer
-import com.example.ui.theme.BankingBluePrimary
+import com.example.ui.theme.AppTheme
 import com.example.ui.theme.PencatatKeuanganTheme
+import com.example.ui.theme.ThemeDirection
+import com.example.ui.theme.ThemePreference
 
 enum class NavTab(
     val title: String,
@@ -71,8 +76,19 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PencatatKeuanganTheme {
-                PencatatKeuanganApp()
+            val context = LocalContext.current
+            // Pilihan tema dibaca sekali saat komposisi pertama, lalu disimpan ke
+            // SharedPreferences setiap kali user menggantinya.
+            var direction by remember { mutableStateOf(ThemePreference.read(context)) }
+
+            PencatatKeuanganTheme(direction = direction) {
+                PencatatKeuanganApp(
+                    themeDirection = direction,
+                    onThemeDirectionChange = { newDirection ->
+                        ThemePreference.write(context, newDirection)
+                        direction = newDirection
+                    }
+                )
             }
         }
     }
@@ -80,14 +96,22 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun PencatatKeuanganApp(
-    viewModel: FinancialViewModel = viewModel()
+    viewModel: FinancialViewModel = viewModel(),
+    themeDirection: ThemeDirection = ThemeDirection.BUKU_KAS,
+    onThemeDirectionChange: (ThemeDirection) -> Unit = {}
 ) {
+    val tokens = AppTheme.tokens
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var currentTab by remember { mutableStateOf(NavTab.HOME) }
 
     // Global dialogs triggered from shortcuts
     var showGlobalAddScheduleDialog by remember { mutableStateOf(false) }
     var showGlobalAddDebtDialog by remember { mutableStateOf(false) }
+
+    // Konfirmasi untuk aksi yang tidak bisa dibatalkan.
+    var pendingScheduleDelete by remember { mutableStateOf<FinancialScheduleEntity?>(null) }
+    var pendingDebtDelete by remember { mutableStateOf<DebtReceivableEntity?>(null) }
+    var pendingCalendarPayId by remember { mutableStateOf<Long?>(null) }
 
     // Handle system back navigation to return to Home screen
     if (currentTab != NavTab.HOME) {
@@ -100,14 +124,14 @@ fun PencatatKeuanganApp(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                tonalElevation = 4.dp,
+                containerColor = tokens.surface,
+                tonalElevation = 0.dp,
                 modifier = Modifier
                     .testTag("bottom_nav_bar")
                     .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
-                        shape = androidx.compose.ui.graphics.RectangleShape
+                        width = tokens.borderWidth,
+                        color = tokens.cardBorder,
+                        shape = RectangleShape
                     )
             ) {
                 NavTab.entries.forEach { tab ->
@@ -124,16 +148,16 @@ fun PencatatKeuanganApp(
                         label = {
                             Text(
                                 text = tab.title,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = BankingBluePrimary,
-                            selectedTextColor = BankingBluePrimary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            indicatorColor = BankingBlueContainer
+                            selectedIconColor = tokens.ink,
+                            selectedTextColor = tokens.ink,
+                            unselectedIconColor = tokens.ink3,
+                            unselectedTextColor = tokens.ink3,
+                            indicatorColor = tokens.brandSoft
                         ),
                         modifier = Modifier.testTag(tab.testTag)
                     )
@@ -141,7 +165,7 @@ fun PencatatKeuanganApp(
             }
         }
     ) { innerPadding ->
-        androidx.compose.foundation.layout.Box(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -172,7 +196,9 @@ fun PencatatKeuanganApp(
                         onOpenAddSchedule = { showGlobalAddScheduleDialog = true },
                         onOpenAddDebt = { showGlobalAddDebtDialog = true },
                         onClearAllData = { viewModel.clearAllData() },
-                        onResetToSingleSample = { viewModel.resetToSingleSample() }
+                        onResetToSingleSample = { viewModel.resetToSingleSample() },
+                        themeDirection = themeDirection,
+                        onThemeDirectionChange = onThemeDirectionChange
                     )
                 }
                 NavTab.CALENDAR -> {
@@ -194,10 +220,11 @@ fun PencatatKeuanganApp(
                             viewModel.dismissSalaryPrompt(scheduleId)
                         },
                         onPayExpense = { scheduleId ->
-                            viewModel.payExpenseChecklist(scheduleId, 1)
+                            // Jangan potong saldo langsung: minta konfirmasi dulu.
+                            pendingCalendarPayId = scheduleId
                         },
                         onDeleteSchedule = { schedule ->
-                            viewModel.deleteSchedule(schedule)
+                            pendingScheduleDelete = schedule
                         }
                     )
                 }
@@ -211,7 +238,7 @@ fun PencatatKeuanganApp(
                             viewModel.addSchedule(title, amount, type, recurrence, intervalDays, startDate, notificationNote)
                         },
                         onDeleteExpense = { schedule ->
-                            viewModel.deleteSchedule(schedule)
+                            pendingScheduleDelete = schedule
                         }
                     )
                 }
@@ -225,7 +252,7 @@ fun PencatatKeuanganApp(
                             viewModel.settleDebtOrReceivable(debtId, amount, note)
                         },
                         onDeleteDebt = { debt ->
-                            viewModel.deleteDebt(debt)
+                            pendingDebtDelete = debt
                         }
                     )
                 }
@@ -261,6 +288,58 @@ fun PencatatKeuanganApp(
                 showGlobalAddDebtDialog = false
             },
             onDismiss = { showGlobalAddDebtDialog = false }
+        )
+    }
+
+    pendingScheduleDelete?.let { schedule ->
+        ConfirmSheet(
+            title = "Hapus jadwal ini?",
+            message = "\"${schedule.title}\" akan dihapus dari daftar jadwal. Riwayat transaksi yang sudah tercatat tidak ikut terhapus.",
+            confirmLabel = "Hapus jadwal",
+            destructive = true,
+            confirmTestTag = "btn_confirm_delete",
+            onConfirm = {
+                viewModel.deleteSchedule(schedule)
+                pendingScheduleDelete = null
+            },
+            onDismiss = { pendingScheduleDelete = null }
+        )
+    }
+
+    pendingDebtDelete?.let { debt ->
+        val isReceivable = debt.type == Constants.DEBT_PIUTANG
+        ConfirmSheet(
+            title = if (isReceivable) "Hapus piutang ini?" else "Hapus hutang ini?",
+            message = "Catatan ${if (isReceivable) "piutang" else "hutang"} untuk ${debt.personName} akan dihapus. Sisa yang belum dilunasi tidak lagi terhitung dalam kekayaan bersih.",
+            confirmLabel = "Hapus catatan",
+            destructive = true,
+            amountPreview = debt.remainingAmount,
+            hint = "Sisa yang belum dilunasi",
+            confirmTestTag = "btn_confirm_delete",
+            onConfirm = {
+                viewModel.deleteDebt(debt)
+                pendingDebtDelete = null
+            },
+            onDismiss = { pendingDebtDelete = null }
+        )
+    }
+
+    val pendingPaySchedule = pendingCalendarPayId?.let { id ->
+        uiState.schedules.firstOrNull { it.id == id }
+    }
+    if (pendingPaySchedule != null) {
+        ConfirmSheet(
+            title = "Konfirmasi pembayaran",
+            message = "Bayar \"${pendingPaySchedule.title}\"? Saldo kas akan dipotong sekarang, dan tagihan muncul lagi pada siklus berikutnya.",
+            confirmLabel = "Bayar & potong saldo",
+            amountPreview = pendingPaySchedule.nominal,
+            hint = "Jumlah yang dipotong dari saldo kas",
+            confirmTestTag = "btn_confirm_pay_expense_modal",
+            onConfirm = {
+                viewModel.payExpenseChecklist(pendingPaySchedule.id, 1)
+                pendingCalendarPayId = null
+            },
+            onDismiss = { pendingCalendarPayId = null }
         )
     }
 }

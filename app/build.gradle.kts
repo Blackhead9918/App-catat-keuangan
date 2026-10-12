@@ -8,6 +8,14 @@ plugins {
   alias(libs.plugins.google.services)
 }
 
+// Penandatanganan release hanya dipakai bila keystore-nya benar-benar ada DAN build ini tidak
+// meminta APK unsigned. Workflow .github/workflows/android-release-apk.yml menetapkan
+// UNSIGNED_RELEASE_BUILD=true sehingga menghasilkan app-release-unsigned.apk.
+// Di AI Studio, keystore tersedia dan variabel itu tidak diset, jadi perilakunya tidak berubah.
+val releaseKeystorePath = System.getenv("KEYSTORE_PATH") ?: "$rootDir/my-upload-key.jks"
+val shouldSignReleaseBuild =
+  System.getenv("UNSIGNED_RELEASE_BUILD") != "true" && file(releaseKeystorePath).exists()
+
 android {
   namespace = "com.example"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
@@ -42,12 +50,19 @@ android {
 
   buildTypes {
     release {
+      // Project ini tidak punya berkas PNG sama sekali (ikon memakai WebP + adaptive icon XML),
+      // jadi isCrunchPngs tidak berpengaruh pada ukuran APK dan dibiarkan seperti bawaan template.
       isCrunchPngs = false
-      isMinifyEnabled = false
+      // "Teroptimasi": R8 mengecilkan kode dan menghapus resource yang tidak dirujuk.
+      // Compose, Room, dan Firebase membawa consumer rules sendiri, dan tidak ada kode di project
+      // ini yang memakai reflection, jadi tidak ada keep rule tambahan yang diperlukan.
+      isMinifyEnabled = true
+      isShrinkResources = true
       proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
       // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in
       // AI Studio.
-      signingConfig = signingConfigs.getByName("release")
+      // Penugasan tetap ada; hanya nilainya yang menyesuaikan. null menghasilkan APK unsigned.
+      signingConfig = if (shouldSignReleaseBuild) signingConfigs.getByName("release") else null
     }
     debug {
       // Do not remove or modify this signingConfig assignment. It is necessary for Android apps in

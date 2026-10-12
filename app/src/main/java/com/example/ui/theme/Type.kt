@@ -1,36 +1,29 @@
 package com.example.ui.theme
 
-import androidx.compose.material3.Typography
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
 
-// Set of Material typography styles to start with
-val Typography =
-  Typography(
-    bodyLarge =
-      TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        letterSpacing = 0.5.sp,
-      )
-    /* Other default text styles to override
-    titleLarge = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Normal,
-        fontSize = 22.sp,
-        lineHeight = 28.sp,
-        letterSpacing = 0.sp
-    ),
-    labelSmall = TextStyle(
-        fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp,
-        letterSpacing = 0.5.sp
-    )
-    */
-  )
+/**
+ * Teks memakai font sistem (keputusan proyek: light-only + font sistem, tidak ada file font).
+ *
+ * [tabular] mengaktifkan `tnum` supaya lebar digit seragam, sehingga kolom nominal
+ * bertumpuk rapi secara vertikal. Ini berlaku untuk angka, bukan teks naratif.
+ */
+fun appTextStyle(
+    size: Int,
+    weight: FontWeight,
+    lineHeight: Int,
+    letterSpacing: Double,
+    tabular: Boolean = false
+): TextStyle = TextStyle(
+    fontFamily = FontFamily.Default,
+    fontWeight = weight,
+    fontSize = size.sp,
+    lineHeight = lineHeight.sp,
+    letterSpacing = letterSpacing.sp,
+    fontFeatureSettings = if (tabular) "tnum" else null,
+    textAlign = TextAlign.Unspecified
+)
